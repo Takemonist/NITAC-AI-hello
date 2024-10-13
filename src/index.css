@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.vcenter-sticky {
+  height: 10px;
+  align-self: flex-start;
+  position: sticky;
+  top: 50%;
+  transform: translate(0px, -50%);
+}
