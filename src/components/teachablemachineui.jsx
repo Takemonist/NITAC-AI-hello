@@ -80,8 +80,8 @@ const TeachableMachineUI = () => {
 
   // サンプルをウェブカメラから追加
   const handleAddSamplesFromWebcam = (classId, dataUrl) => {
-    setClasses(
-      classes.map((cls) =>
+    setClasses((prevClasses) =>
+      prevClasses.map((cls) =>
         cls.id === classId
           ? { ...cls, images: [...cls.images, dataUrl] }
           : cls
