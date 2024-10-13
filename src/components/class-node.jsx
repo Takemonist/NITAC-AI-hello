@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Webcam from 'react-webcam';
 
+
 const ClassNode = ({
   cls,
   onDelete,
@@ -28,8 +29,6 @@ const ClassNode = ({
   const webcamRef = useRef(null);
   const captureInterval = useRef(null);
 
-
-  
   const handleRename = () => {
     if (newName.trim() !== '') {
       onRename(cls.id, newName);
@@ -186,6 +185,7 @@ const ClassNode = ({
                   height: 400,
                   facingMode: 'user',
                 }}
+                onUserMediaError={() => console.log('cant access your camera')}
               />
             </div>
 
