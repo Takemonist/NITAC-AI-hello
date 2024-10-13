@@ -1,5 +1,5 @@
 // ClassNode.jsx
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Camera,
   Upload,
@@ -9,7 +9,6 @@ import {
   Settings,
 } from 'lucide-react';
 import Webcam from 'react-webcam';
-
 
 const ClassNode = ({
   cls,
@@ -49,32 +48,30 @@ const ClassNode = ({
       clearInterval(captureInterval.current);
     };
   }, [showOptions]);
-  
 
-  const handleCapture = () => {
+  const handleCapture = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
         onAddSamplesFromWebcam(imageSrc);
       }
     }
-  };
+  }, [onAddSamplesFromWebcam]);
 
-  const handleStartRecording = () => {
+  const startCapturing = useCallback(() => {
     if (!isRecording) {
       setIsRecording(true);
-      captureInterval.current = setInterval(() => {
-        handleCapture();
-      }, 1000 / fps);
+      handleCapture(); // すぐに1枚キャプチャ
+      captureInterval.current = setInterval(handleCapture, 1000 / fps);
     }
-  };
+  }, [isRecording, handleCapture, fps]);
 
-  const handleStopRecording = () => {
+  const stopCapturing = useCallback(() => {
     if (isRecording) {
       setIsRecording(false);
       clearInterval(captureInterval.current);
     }
-  };
+  }, [isRecording]);
 
   const handleRemoveSample = (imageSrc) => {
     onRemoveSample(cls.id, imageSrc);
@@ -86,6 +83,15 @@ const ClassNode = ({
       setFps(newFps);
     }
   };
+
+  // FPSが変更されたときにインターバルをリセット
+  useEffect(() => {
+    if (isRecording) {
+      clearInterval(captureInterval.current);
+      captureInterval.current = setInterval(handleCapture, 1000 / fps);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fps]);
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -192,11 +198,12 @@ const ClassNode = ({
             {/* Recording Controls */}
             <div className="flex items-center space-x-4">
               <button
-                onMouseDown={handleStartRecording}
-                onMouseUp={handleStopRecording}
-                onMouseLeave={handleStopRecording}
-                onTouchStart={handleStartRecording}
-                onTouchEnd={handleStopRecording}
+                onMouseDown={startCapturing}
+                onMouseUp={stopCapturing}
+                onMouseLeave={stopCapturing}
+                onTouchStart={startCapturing}
+                onTouchEnd={stopCapturing}
+                disabled={isRecording}
                 className={`flex items-center justify-center ${
                   isRecording
                     ? 'bg-red-600 cursor-not-allowed opacity-75'
